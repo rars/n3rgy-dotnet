@@ -1,0 +1,37 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.10.34707.107
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "N3rgy.Api.Client", "N3rgy.Api.Client\N3rgy.Api.Client.csproj", "{6BE2E3C9-8354-400B-9A59-180BFDCA7ED4}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "N3rgy.Api.Cli", "N3rgy.Api.Cli\N3rgy.Api.Cli.csproj", "{7EFB1984-24FB-4CF2-8F48-BF12398A1F7B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{F6E48DC7-B8AC-4CF4-8268-EF1F028722CF}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+		.gitignore = .gitignore
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6BE2E3C9-8354-400B-9A59-180BFDCA7ED4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6BE2E3C9-8354-400B-9A59-180BFDCA7ED4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6BE2E3C9-8354-400B-9A59-180BFDCA7ED4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6BE2E3C9-8354-400B-9A59-180BFDCA7ED4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7EFB1984-24FB-4CF2-8F48-BF12398A1F7B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7EFB1984-24FB-4CF2-8F48-BF12398A1F7B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7EFB1984-24FB-4CF2-8F48-BF12398A1F7B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7EFB1984-24FB-4CF2-8F48-BF12398A1F7B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {D1D3BF8F-9891-4CD2-80B6-FD1A9A0CC07B}
+	EndGlobalSection
+EndGlobal
