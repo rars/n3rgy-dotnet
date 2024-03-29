@@ -4,23 +4,26 @@
     <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
 
   <PropertyGroup>
-	<Description>.NET client library for querying n3rgy API (https://www.n3rgy.com/)</Description>
-	<Authors>Richard Russell</Authors>
-	<Copyright>2024 Richard Russell</Copyright>
-	<RepositoryUrl>https://github.com/rars/n3rgy-dotnet</RepositoryUrl>
-	<PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <Description>.NET client library for querying n3rgy API (https://www.n3rgy.com/)</Description>
+    <Authors>Richard Russell</Authors>
+    <Copyright>2024 Richard Russell</Copyright>
+    <RepositoryUrl>https://github.com/rars/n3rgy-dotnet</RepositoryUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="CsvHelper" Version="31.0.2" />
     <PackageReference Include="Flurl.Http" Version="4.0.2" />
-    <PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.556">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
   </ItemGroup>
+
+  <PropertyGroup>
+    <CodeAnalysisRuleSet>../StyleCop.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+
+  <Import Project="../StyleCop.props" />
 
 </Project>

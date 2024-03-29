@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<RuleSet Name="StyleCop Ruleset" Description="These StyleCop rules are customized for these projects." ToolsVersion="17.0">
+  <Rules AnalyzerId="StyleCop.Analyzers" RuleNamespace="StyleCop.Analyzers">
+    <Rule Id="SA0001" Action="None" />
+    <Rule Id="SA1101" Action="None" />
+    <Rule Id="SA1108" Action="None" />
+    <Rule Id="SA1309" Action="None" />
+    <Rule Id="SA1311" Action="None" />
+    <Rule Id="SA1313" Action="None" />
+    <Rule Id="SA1316" Action="None" />
+    <Rule Id="SA1400" Action="None" />
+    <Rule Id="SA1401" Action="None" />
+    <Rule Id="SA1412" Action="Warning" />
+    <Rule Id="SA1600" Action="None" />
+    <Rule Id="SA1602" Action="None" />
+    <Rule Id="SA1633" Action="None" />
+    <Rule Id="SA1652" Action="None" />
+    <Rule Id="SX1309" Action="Warning" />
+  </Rules>
+</RuleSet>

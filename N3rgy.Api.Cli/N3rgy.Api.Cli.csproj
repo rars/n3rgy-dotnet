@@ -5,10 +5,26 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <PackAsTool>true</PackAsTool>
+    <ToolCommandName>n3rgy</ToolCommandName>
+    <PackageOutputPath>./nupkg</PackageOutputPath>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="8.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.CommandLine" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="8.0.0" />
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\N3rgy.Api.Client\N3rgy.Api.Client.csproj" />
   </ItemGroup>
+
+  <PropertyGroup>
+    <CodeAnalysisRuleSet>../StyleCop.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+
+  <Import Project="../StyleCop.props" />
 
 </Project>

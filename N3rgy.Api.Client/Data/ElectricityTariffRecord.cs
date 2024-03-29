@@ -8,10 +8,10 @@ public sealed record ElectricityTariffRecord
     public DateTime Timestamp { get; init; }
 
     [Name("chargeType")]
-    public string ChargeType { get; init; }
+    public string? ChargeType { get; init; }
 
     [Name("standingCharge (pence per day)")]
-    public decimal StandingChargePence { get; init; }
+    public decimal? StandingChargePence { get; init; }
 
     [Name("touPrice (pence per kWh)")]
     public decimal? TouPricePence { get; init; }

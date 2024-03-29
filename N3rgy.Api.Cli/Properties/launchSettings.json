@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "N3rgy.Api.Cli": {
+      "commandName": "Project",
+      "commandLineArgs": "--StartDate 2024-03-24 --EndDate 2024-03-29 --EnergyType electricity --RecordType consumption --CsvOutFile test.csv"
+    }
+  }
+}
