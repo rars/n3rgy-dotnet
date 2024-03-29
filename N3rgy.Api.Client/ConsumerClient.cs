@@ -10,7 +10,7 @@ using N3rgy.Api.Client.Constants;
 using N3rgy.Api.Client.Data;
 using N3rgy.Api.Client.Extensions;
 
-public sealed class ConsumerClient
+public sealed class ConsumerClient : IConsumerClient
 {
     private readonly string _baseUrl;
     private readonly IN3rgyAuthorizationProvider _authorizationProvider;
@@ -24,8 +24,11 @@ public sealed class ConsumerClient
     }
 
     /// <summary>
-    /// Retrieve
+    /// Retrieve electricity consumption data for the specified date range.
     /// </summary>
+    /// <param name="startDate">The start date of the date range.</param>
+    /// <param name="endDate">The end date of the date range.</param>
+    /// <param name="cancellationToken">For signalling cancellation.</param>
     /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
     public Task<IReadOnlyList<ElectricityConsumptionRecord>> GetElectricityConsumption(
         DateOnly startDate,

@@ -1,6 +1,10 @@
-﻿using System.Globalization;
+﻿using System.Diagnostics;
+using System.Globalization;
+using System.Reflection;
+using Cocona;
 using CsvHelper;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using N3rgy.Api.Client;
 using N3rgy.Api.Client.Authorization;
 
@@ -18,83 +22,60 @@ if (apiKey is null)
     apiKey = Console.ReadLine()?.Trim();
 }
 
-static string GetInput(
-    IConfiguration configuration,
-    string key)
-{
-    var inputValue = configuration.GetValue<string>(key);
+var builder = CoconaApp.CreateBuilder();
 
-    if (inputValue is null)
+builder.Services.AddSingleton<IN3rgyAuthorizationProvider>(new StaticN3rgyAuthorizationProvider(apiKey!));
+builder.Services.AddSingleton<IConsumerClient>(sp => new ConsumerClient(sp.GetRequiredService<IN3rgyAuthorizationProvider>()));
+
+var app = builder.Build();
+
+app.AddSubCommand(
+    "electricity",
+    x =>
     {
-        Console.Write($"Missing argument {key}. Please enter value for {key} now and press enter: ");
-        inputValue = Console.ReadLine()?.Trim();
-    }
+        x.AddCommand(
+            "consumption",
+            async (DateOnly startDate, DateOnly endDate, string? outputFile, IConsumerClient client) =>
+                await ProcessRecords(() => client.GetElectricityConsumption(startDate, endDate), outputFile))
+         .WithDescription("Retrieves electricity consumption data.");
 
-    return inputValue ?? throw new ArgumentException($"No value for {key} supplied.");
-}
+        x.AddCommand(
+            "tariff",
+            async (DateOnly startDate, DateOnly endDate, string? outputFile, IConsumerClient client) =>
+                await ProcessRecords(() => client.GetElectricityTariff(startDate, endDate), outputFile))
+         .WithDescription("Retrieves electricity tariff data.");
+    })
+    .WithDescription("Retrieves data related to electricity energy usage.");
 
-var authorizationProvider = new StaticN3rgyAuthorizationProvider(apiKey ?? throw new ArgumentException("Missing IHD MAC address. Please set env var 'N3RGY__APIKEY' to your IHD MAC address."));
+app.AddSubCommand(
+    "gas",
+    x =>
+    {
+        x.AddCommand(
+            "consumption",
+            async (DateOnly startDate, DateOnly endDate, string? outputFile, IConsumerClient client) =>
+                await ProcessRecords(() => client.GetGasConsumption(startDate, endDate), outputFile))
+         .WithDescription("Retrieves gas consumption data.");
 
-var startDate = configuration.GetValue<DateOnly?>("StartDate") ?? throw new ArgumentException("Missing StartDate parameter. Please run with e.g. --StartDate 20240324.");
-var endDate = configuration.GetValue<DateOnly?>("EndDate") ?? throw new ArgumentException("Missing EndDate parameter. Please run with e.g. --EndDate 20240328.");
+        x.AddCommand(
+            "tariff",
+            async (DateOnly startDate, DateOnly endDate, string? outputFile, IConsumerClient client) =>
+                await ProcessRecords(() => client.GetGasTariff(startDate, endDate), outputFile))
+         .WithDescription("Retrieves gas tariff data.");
+    })
+    .WithDescription("Retrieves data related to gas energy usage.");
 
-var energyType = GetInput(configuration, "EnergyType");
-var recordType = GetInput(configuration, "RecordType");
-var outputFile = configuration.GetValue<string>("CsvOutFile");
+app.AddCommand(
+    "version",
+    () =>
+    {
+        var assemblyLocation = Assembly.GetExecutingAssembly().Location;
+        var productVersion = FileVersionInfo.GetVersionInfo(assemblyLocation).ProductVersion;
+        Console.WriteLine(productVersion);
+    })
+    .WithDescription("Outputs the product version of this tool.");
 
-var client = new ConsumerClient(authorizationProvider);
-
-switch (energyType)
-{
-    case "electricity":
-        {
-            switch (recordType)
-            {
-                case "consumption":
-                    {
-                        await ProcessRecords(() => client.GetElectricityConsumption(startDate, endDate), outputFile);
-                        break;
-                    }
-
-                case "tariff":
-                    {
-                        await ProcessRecords(() => client.GetElectricityTariff(startDate, endDate), outputFile);
-                        break;
-                    }
-
-                default:
-                    throw new ArgumentException($"Unknown RecordType: {recordType}. Must be one of 'consumption', 'tariff'.");
-            }
-
-            break;
-        }
-
-    case "gas":
-        {
-            switch (recordType)
-            {
-                case "consumption":
-                    {
-                        await ProcessRecords(() => client.GetGasConsumption(startDate, endDate), outputFile);
-                        break;
-                    }
-
-                case "tariff":
-                    {
-                        await ProcessRecords(() => client.GetGasTariff(startDate, endDate), outputFile);
-                        break;
-                    }
-
-                default:
-                    throw new ArgumentException($"Unknown RecordType: {recordType}. Must be one of 'consumption', 'tariff'.");
-            }
-
-            break;
-        }
-
-    default:
-        throw new ArgumentException($"Unknown EnergyType: {energyType}. Must be one of 'electricity', 'gas'.");
-}
+await app.RunAsync();
 
 static async Task ProcessRecords<TRecord>(
     Func<Task<IReadOnlyList<TRecord>>> getRecords,

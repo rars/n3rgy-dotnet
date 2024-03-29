@@ -2,7 +2,7 @@
 
 using N3rgy.Api.Client.Data;
 
-internal interface IConsumerClient
+public interface IConsumerClient
 {
     public Task<IReadOnlyList<ElectricityConsumptionRecord>> GetElectricityConsumption(
         DateOnly startDate,
