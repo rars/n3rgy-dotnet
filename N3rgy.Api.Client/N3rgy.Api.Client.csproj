@@ -18,6 +18,9 @@
   <ItemGroup>
     <PackageReference Include="CsvHelper" Version="31.0.2" />
     <PackageReference Include="Flurl.Http" Version="4.0.2" />
+    <PackageReference Include="GitVersion.MsBuild" Version="5.6.10*">
+      <PrivateAssets>All</PrivateAssets>
+    </PackageReference>
   </ItemGroup>
 
   <PropertyGroup>
