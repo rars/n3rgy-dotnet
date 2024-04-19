@@ -1,6 +1,5 @@
 ﻿namespace N3rgy.Api.Client;
 
-using System;
 using System.Globalization;
 using CsvHelper;
 using Flurl;
@@ -26,43 +25,42 @@ public sealed class ConsumerClient : IConsumerClient
     /// <summary>
     /// Retrieve electricity consumption data for the specified date range.
     /// </summary>
-    /// <param name="startDate">The start date of the date range.</param>
-    /// <param name="endDate">The end date of the date range.</param>
+    /// <param name="dateRange">The date range to retrieve data for.</param>
     /// <param name="cancellationToken">For signalling cancellation.</param>
     /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
     public Task<IReadOnlyList<ElectricityConsumptionRecord>> GetElectricityConsumption(
-        DateOnly startDate,
-        DateOnly endDate,
+        DateRange dateRange,
         CancellationToken cancellationToken = default)
-        => GetRecordsImpl<ElectricityConsumptionRecord>(ApiConstants.Electricity, ApiConstants.Consumption, startDate, endDate, cancellationToken);
+        => GetRecordsImpl<ElectricityConsumptionRecord>(ApiConstants.Electricity, ApiConstants.Consumption, dateRange, cancellationToken);
 
-    public Task<IReadOnlyList<GasConsumptionRecord>> GetGasConsumption(
-        DateOnly startDate,
-        DateOnly endDate,
+    public async Task<IReadOnlyList<GasConsumptionRecord>> GetGasConsumption(
+        DateRange dateRange,
+        bool filterMissing = true,
         CancellationToken cancellationToken = default)
-        => GetRecordsImpl<GasConsumptionRecord>(ApiConstants.Gas, ApiConstants.Consumption, startDate, endDate, cancellationToken);
+    {
+        var records = await GetRecordsImpl<GasConsumptionRecord>(ApiConstants.Gas, ApiConstants.Consumption, dateRange, cancellationToken);
+
+        return filterMissing ? records.Where(x => x.EnergyConsumptionM3 != ApiConstants.MissingGasEnergyConsumptionM3).ToList() : records;
+    }
 
     public Task<IReadOnlyList<ElectricityTariffRecord>> GetElectricityTariff(
-        DateOnly startDate,
-        DateOnly endDate,
+        DateRange dateRange,
         CancellationToken cancellationToken = default)
-        => GetRecordsImpl<ElectricityTariffRecord>(ApiConstants.Electricity, ApiConstants.Tariff, startDate, endDate, cancellationToken);
+        => GetRecordsImpl<ElectricityTariffRecord>(ApiConstants.Electricity, ApiConstants.Tariff, dateRange, cancellationToken);
 
     public Task<IReadOnlyList<GasTariffRecord>> GetGasTariff(
-        DateOnly startDate,
-        DateOnly endDate,
+        DateRange dateRange,
         CancellationToken cancellationToken = default)
-        => GetRecordsImpl<GasTariffRecord>(ApiConstants.Gas, ApiConstants.Tariff, startDate, endDate, cancellationToken);
+        => GetRecordsImpl<GasTariffRecord>(ApiConstants.Gas, ApiConstants.Tariff, dateRange, cancellationToken);
 
     public async Task<IReadOnlyList<TRecord>> GetRecordsImpl<TRecord>(
         string energyType,
         string readingType,
-        DateOnly startDate,
-        DateOnly endDate,
+        DateRange dateRange,
         CancellationToken cancellationToken)
     {
         var result = await $"{_baseUrl}/{energyType}/{readingType}/1"
-            .SetQueryParams(new { start = startDate.ToDateString(), end = endDate.ToDateString(), output = "csv" })
+            .SetQueryParams(new { start = dateRange.StartDate.ToDateString(), end = dateRange.EndDate.ToDateString(), output = "csv" })
             .WithHeader("Authorization", await _authorizationProvider.GetAuthorization(cancellationToken))
             .GetStreamAsync(cancellationToken: cancellationToken);
 

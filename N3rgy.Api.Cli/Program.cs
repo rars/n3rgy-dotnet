@@ -7,6 +7,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using N3rgy.Api.Client;
 using N3rgy.Api.Client.Authorization;
+using N3rgy.Api.Client.Data;
 
 IConfiguration configuration = new ConfigurationBuilder()
     .AddEnvironmentVariables()
@@ -35,14 +36,14 @@ app.AddSubCommand(
     {
         x.AddCommand(
             "consumption",
-            async (DateOnly startDate, DateOnly endDate, string? outputFile, IConsumerClient client) =>
-                await ProcessRecords(() => client.GetElectricityConsumption(startDate, endDate), outputFile))
+            async (DateOnly? startDate, DateOnly? endDate, string? outputFile, IConsumerClient client) =>
+                await ProcessRecords(() => client.GetElectricityConsumption(GetDateRange(startDate, endDate)), outputFile))
          .WithDescription("Retrieves electricity consumption data.");
 
         x.AddCommand(
             "tariff",
-            async (DateOnly startDate, DateOnly endDate, string? outputFile, IConsumerClient client) =>
-                await ProcessRecords(() => client.GetElectricityTariff(startDate, endDate), outputFile))
+            async (DateOnly? startDate, DateOnly? endDate, string? outputFile, IConsumerClient client) =>
+                await ProcessRecords(() => client.GetElectricityTariff(GetDateRange(startDate, endDate)), outputFile))
          .WithDescription("Retrieves electricity tariff data.");
     })
     .WithDescription("Retrieves data related to electricity energy usage.");
@@ -53,14 +54,14 @@ app.AddSubCommand(
     {
         x.AddCommand(
             "consumption",
-            async (DateOnly startDate, DateOnly endDate, string? outputFile, IConsumerClient client) =>
-                await ProcessRecords(() => client.GetGasConsumption(startDate, endDate), outputFile))
+            async (DateOnly? startDate, DateOnly? endDate, string? outputFile, IConsumerClient client) =>
+                await ProcessRecords(() => client.GetGasConsumption(GetDateRange(startDate, endDate)), outputFile))
          .WithDescription("Retrieves gas consumption data.");
 
         x.AddCommand(
             "tariff",
-            async (DateOnly startDate, DateOnly endDate, string? outputFile, IConsumerClient client) =>
-                await ProcessRecords(() => client.GetGasTariff(startDate, endDate), outputFile))
+            async (DateOnly? startDate, DateOnly? endDate, string? outputFile, IConsumerClient client) =>
+                await ProcessRecords(() => client.GetGasTariff(GetDateRange(startDate, endDate)), outputFile))
          .WithDescription("Retrieves gas tariff data.");
     })
     .WithDescription("Retrieves data related to gas energy usage.");
@@ -76,6 +77,13 @@ app.AddCommand(
     .WithDescription("Outputs the product version of this tool.");
 
 await app.RunAsync();
+
+static DateRange GetDateRange(DateOnly? startDate, DateOnly? endDate)
+{
+    endDate ??= DateOnly.FromDateTime(DateTime.Now);
+    startDate ??= endDate?.AddDays(-90);
+    return new DateRange(startDate!.Value, endDate!.Value);
+}
 
 static async Task ProcessRecords<TRecord>(
     Func<Task<IReadOnlyList<TRecord>>> getRecords,
