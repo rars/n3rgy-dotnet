@@ -1,126 +1,51 @@
-﻿using System.Diagnostics;
-using System.Globalization;
+﻿namespace N3rgy.Api.Cli;
+
+using System.Diagnostics;
 using System.Reflection;
 using Cocona;
-using CsvHelper;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using N3rgy.Api.Client;
 using N3rgy.Api.Client.Authorization;
-using N3rgy.Api.Client.Data;
 
-IConfiguration configuration = new ConfigurationBuilder()
-    .AddEnvironmentVariables()
-    .AddCommandLine(args)
-    .Build();
-
-string? apiKey = configuration.GetValue<string>("N3RGY:APIKEY");
-
-if (apiKey is null)
+[HasSubCommands(typeof(ElectricityCommands), "electricity", Description = "Retrieves data related to electricity energy usage.")]
+[HasSubCommands(typeof(GasCommands), "gas", Description = "Retrieves data related to gas energy usage.")]
+public sealed class Program
 {
-    Console.WriteLine("Please set the environment variable 'N3RGY__APIKEY' to your In Home Display (IHD) MAC address to avoid manually inputting this value below.");
-    Console.Write("Please enter your IHD MAC here and press enter: ");
-    apiKey = Console.ReadLine()?.Trim();
-}
-
-var builder = CoconaApp.CreateBuilder();
-
-builder.Services.AddSingleton<IN3rgyAuthorizationProvider>(new StaticN3rgyAuthorizationProvider(apiKey!));
-builder.Services.AddSingleton<IConsumerClient>(sp => new ConsumerClient(sp.GetRequiredService<IN3rgyAuthorizationProvider>()));
-
-var app = builder.Build();
-
-app.AddSubCommand(
-    "electricity",
-    x =>
+    public static string GetApiKey(IServiceProvider serviceProvider)
     {
-        x.AddCommand(
-            "consumption",
-            async (DateOnly? startDate, DateOnly? endDate, string? outputFile, IConsumerClient client) =>
-                await ProcessRecords(() => client.GetElectricityConsumption(GetDateRange(startDate, endDate)), outputFile))
-         .WithDescription("Retrieves electricity consumption data.");
+        IConfiguration configuration = serviceProvider.GetRequiredService<IConfiguration>();
+        string? apiKey = configuration.GetValue<string>("N3RGY:APIKEY");
 
-        x.AddCommand(
-            "tariff",
-            async (DateOnly? startDate, DateOnly? endDate, string? outputFile, IConsumerClient client) =>
-                await ProcessRecords(() => client.GetElectricityTariff(GetDateRange(startDate, endDate)), outputFile))
-         .WithDescription("Retrieves electricity tariff data.");
-    })
-    .WithDescription("Retrieves data related to electricity energy usage.");
+        if (apiKey is not null)
+        {
+            return apiKey;
+        }
 
-app.AddSubCommand(
-    "gas",
-    x =>
+        Console.WriteLine("Please set the environment variable 'N3RGY__APIKEY' to your In Home Display (IHD) MAC address to avoid manually inputting this value below.");
+        Console.Write("Please enter your IHD MAC here and press enter: ");
+        return Console.ReadLine()?.Trim() ?? "";
+    }
+
+    public static async Task Main(string[] args)
     {
-        x.AddCommand(
-            "consumption",
-            async (DateOnly? startDate, DateOnly? endDate, string? outputFile, IConsumerClient client) =>
-                await ProcessRecords(() => client.GetGasConsumption(GetDateRange(startDate, endDate)), outputFile))
-         .WithDescription("Retrieves gas consumption data.");
+        await CoconaApp.CreateHostBuilder()
+            .ConfigureServices(services =>
+            {
+                services.AddSingleton<IN3rgyAuthorizationProvider>(sp => new StaticN3rgyAuthorizationProvider(GetApiKey(sp)));
+                services.AddSingleton<IConsumerClient>(sp => new ConsumerClient(sp.GetRequiredService<IN3rgyAuthorizationProvider>()));
+            })
+            .RunAsync<Program>(args, options =>
+            {
+                options.EnableShellCompletionSupport = true;
+            });
+    }
 
-        x.AddCommand(
-            "tariff",
-            async (DateOnly? startDate, DateOnly? endDate, string? outputFile, IConsumerClient client) =>
-                await ProcessRecords(() => client.GetGasTariff(GetDateRange(startDate, endDate)), outputFile))
-         .WithDescription("Retrieves gas tariff data.");
-    })
-    .WithDescription("Retrieves data related to gas energy usage.");
-
-app.AddCommand(
-    "version",
-    () =>
+    [Command(Description = "Outputs the product version of this tool.")]
+    public static void Version()
     {
         var assemblyLocation = Assembly.GetExecutingAssembly().Location;
         var productVersion = FileVersionInfo.GetVersionInfo(assemblyLocation).ProductVersion;
         Console.WriteLine(productVersion);
-    })
-    .WithDescription("Outputs the product version of this tool.");
-
-await app.RunAsync();
-
-static DateRange GetDateRange(DateOnly? startDate, DateOnly? endDate)
-{
-    endDate ??= DateOnly.FromDateTime(DateTime.Now);
-    startDate ??= endDate?.AddDays(-90);
-    return new DateRange(startDate!.Value, endDate!.Value);
-}
-
-static async Task ProcessRecords<TRecord>(
-    Func<Task<IReadOnlyList<TRecord>>> getRecords,
-    string? outputFile)
-{
-    var records = await getRecords();
-
-    if (outputFile is null)
-    {
-        WriteToStdOut(records);
     }
-    else
-    {
-        Console.Write($"Writing {records.Count} records to {outputFile}...");
-        WriteToCsv(records, outputFile);
-        Console.WriteLine(" Done.");
-    }
-}
-
-static void WriteToCsv<TRecord>(
-    IReadOnlyList<TRecord> records,
-    string outputFile)
-{
-    using var writer = new StreamWriter(outputFile);
-    using var csv = new CsvWriter(writer, CultureInfo.InvariantCulture);
-
-    csv.WriteRecords(records);
-}
-
-static void WriteToStdOut<TRecord>(
-    IReadOnlyList<TRecord> records)
-{
-    using var writer = new StringWriter();
-    using var csv = new CsvWriter(writer, CultureInfo.InvariantCulture);
-
-    csv.WriteRecords(records);
-    csv.Flush();
-
-    Console.WriteLine(writer.ToString());
 }
