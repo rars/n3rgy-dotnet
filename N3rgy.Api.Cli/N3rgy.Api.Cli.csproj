@@ -9,6 +9,15 @@
     <ToolCommandName>n3rgy</ToolCommandName>
     <PackageOutputPath>./nupkg</PackageOutputPath>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <Description>.NET CLI for querying n3rgy API (https://www.n3rgy.com/)</Description>
+    <Authors>Richard Russell</Authors>
+    <Copyright>2024 Richard Russell</Copyright>
+    <RepositoryUrl>https://github.com/rars/n3rgy-dotnet</RepositoryUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
 
   <ItemGroup>
@@ -23,6 +32,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\N3rgy.Api.Client\N3rgy.Api.Client.csproj" />
+    <None Include="README.md" Pack="true" PackagePath="\" />
   </ItemGroup>
 
   <PropertyGroup>
